@@ -1,0 +1,7 @@
+<resources>
+
+    <style name="floating_action_button">
+        <item name="android:layout_margin">24dp</item>
+    </style>
+
+</resources>

@@ -1,0 +1,162 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             tools:context="it.jaschke.alexandria.AddBook">
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/ean"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/padding_med"
+            android:layout_marginRight="@dimen/padding_med"
+            android:layout_marginTop="@dimen/isbn_search_top_margin"
+            android:hint="@string/input_hint"
+            android:inputType="number"
+            android:maxLength="@integer/ean_size"
+            android:maxLines="1"
+            android:minEms="@integer/ean_width"
+            android:saveEnabled="true"
+            tools:text="f12533123131"/>
+
+        <LinearLayout
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="25dp"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/bookCover"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:contentDescription="@string/book_cover"
+                android:layout_gravity="top|left"
+                android:adjustViewBounds="true"
+                android:layout_marginLeft="@dimen/padding_med"
+                android:layout_marginRight="@dimen/padding_med"
+                android:maxWidth="180dp"
+                android:minWidth="180dp"
+                tools:src="@drawable/disc_sample"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="2">
+
+                <TextView
+                    android:id="@+id/bookTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:textIsSelectable="true"
+                    android:textSize="@dimen/head_line"
+                    android:textStyle="bold"
+                    tools:text="The new highway code"/>
+
+                <TextView
+                    android:id="@+id/bookSubTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/bookTitle"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginTop="10dp"
+                    android:ellipsize="end"
+                    android:maxLines="3"
+                    tools:text="The new highway code to cross"/>
+
+
+                <TextView
+                    android:id="@+id/authors"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_below="@+id/bookSubTitle"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginTop="20dp"
+                    android:gravity="end"
+                    android:textSize="@dimen/small_fontsize"
+                    tools:text="Alexandaria"
+                    />
+
+
+                <TextView
+                    android:id="@+id/categories"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/bookSubTitle"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginTop="20dp"
+                    android:textSize="@dimen/small_fontsize"
+                    tools:text="Transportation"
+                    />
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="50dip"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/delete_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:drawableLeft="@drawable/ic_delete_white"
+                android:text="@string/remove_button"
+                android:visibility="invisible"
+                />
+
+            <Button
+                android:id="@+id/clear_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_gravity="bottom"
+                android:layout_weight="1"
+                android:drawableLeft="@drawable/ic_action_accept"
+                android:text="@string/clear_button"
+                android:visibility="invisible"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        style="@style/floating_action_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:src="@drawable/ic_book_white_18dp"
+        app:elevation="6dp"
+        app:pressedTranslationZ="12dp"/>
+</FrameLayout>

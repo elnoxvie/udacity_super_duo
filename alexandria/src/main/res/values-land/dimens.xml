@@ -1,0 +1,3 @@
+<resources>
+    <dimen name="isbn_search_top_margin">10dp</dimen>
+</resources>
