@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Patterns;
@@ -17,6 +18,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.bumptech.glide.Glide;
@@ -30,6 +32,8 @@ import it.jaschke.alexandria.services.BookService;
 public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = "INTENT_TO_SCAN_ACTIVITY";
     public static final String ISBN_PREFIX = "978";
+    int ISBN_LENGTH = 10;
+
     private EditText ean;
    private final int LOADER_ID = 1;
    private View rootView;
@@ -86,6 +90,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
          @Override
          public void onClick(View view) {
             ean.setText("");
+            clearFields();
          }
       });
 
@@ -111,7 +116,13 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
       return rootView;
    }
 
-   @Override
+    @Override
+    public void onStart() {
+        super.onStart();
+       // getLoaderManager().initLoader(LOADER_ID, null, this);
+    }
+
+    @Override
    public void onDestroyView() {
       ean.removeTextChangedListener(mIsbnTextWatcher);
       super.onDestroyView();
@@ -131,15 +142,30 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
       @Override
       public void afterTextChanged(Editable s) {
          String ean = s.toString();
+
+         //we dont want to unnecessarily run the service. For now, we will program it to not do anythin if less than 10 characters
+         if (ean.length() < 10) {
+              return;
+         }
          //catch isbn10 numbers
          if (ean.length() == 10 && !ean.startsWith(ISBN_PREFIX)) {
             ean = ISBN_PREFIX + ean;
          }
 
-         if (ean.length() < 13) {
-            clearFields();
-            return;
-         }
+          if (!Utility.isNetworkConnected(getActivity())){
+              Toast.makeText(getActivity(), R.string.no_internet_connection, Toast.LENGTH_SHORT).show();
+              return;
+          }
+
+
+          /***
+           * As per commented, this seems to be not conforming with the use case, thus this is disable
+           * for now.
+           */
+//         if (ean.length() < 13) {
+//            clearFields();
+//            return;
+//         }
 
          //Once we have an ISBN, start a book intent
          Intent bookIntent = new Intent(getActivity(), BookService.class);
@@ -157,9 +183,9 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
          public void run() {
             if (progress) {
                mProgressBar.setVisibility(View.VISIBLE);
-               mContainer.setVisibility(View.GONE);
+               mContainer.setVisibility(View.INVISIBLE);
             } else {
-               mProgressBar.setVisibility(View.GONE);
+               mProgressBar.setVisibility(View.INVISIBLE);
                mContainer.setVisibility(View.VISIBLE);
             }
 
@@ -172,13 +198,10 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
    public void onActivityResult(int requestCode, int resultCode, Intent data) {
       IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
 
-      String toast;
-
       if (result != null) {
          if (result.getContents() == null) {
-            toast = "Cancelled from fragment";
+
          } else {
-            toast = "Scanned from fragment: " + result.getContents();
             ean.setText(result.getContents().toString());
             restartLoader();
          }
@@ -189,17 +212,28 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
    }
 
    private void restartLoader() {
-      getLoaderManager().restartLoader(LOADER_ID, null, this);
+
+      Loader loader = getLoaderManager().getLoader(LOADER_ID);
+       if (loader != null && !loader.isReset()) {
+           getLoaderManager().restartLoader(LOADER_ID, null, this);
+       } else {
+           getLoaderManager().initLoader(LOADER_ID, null, this);
+       }
+
+      //getLoaderManager().restartLoader(LOADER_ID, null, this);
    }
 
    @Override
    public android.support.v4.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-      if (ean.getText().length() == 0) {
-         return null;
-      }
+
+       //We don't want to return null. This seems to stop the Content Observer from doing it's job
+//      if (ean.getText().length() == 0) {
+//         return null;
+//      }
+
       String eanStr = ean.getText().toString();
-      if (eanStr.length() == 10 && !eanStr.startsWith("978")) {
-         eanStr = "978" + eanStr;
+       if (eanStr.length() == ISBN_LENGTH  && !eanStr.startsWith(ISBN_PREFIX)) {
+         eanStr = ISBN_PREFIX + eanStr;
       }
 
       showProgress(true);
@@ -219,6 +253,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
       if (!data.moveToFirst()) {
          return;
       }
+
 
       String bookTitle = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.TITLE));
       ((TextView) rootView.findViewById(R.id.bookTitle)).setText(bookTitle);

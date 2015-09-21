@@ -17,6 +17,7 @@
     <string name="ok_button">Next</string>
     <string name="cancel_button">Cancel</string>
     <string name="not_found">No Book found</string>
+    <string name="connection_error">Connection Error, Unable to fetch books. Please try again later. </string>
     <string name="search">Search</string>
     <string name="delete">Delete Book</string>
     <string name="pref_startScreen">Select Startscreen</string>
@@ -28,4 +29,10 @@
     The original version of this app was built by Sascha Jaschke, and a modified version is given to students in the Udacity Android Nanodegree program. </string>
     <string name="remove_button">Remove</string>
     <string name="clear_button">Clear</string>
+    <string name="no_internet_connection">Book search failed, please make sure you have internet connection</string>
+    <string name="isbn_empty">ISBN number cannot be empty</string>
+    <string name="err_isbn_length_incorrect">ISBN Length Incorrect, please make sure you have entered the correct ISBN</string>
+    <string name="err_no_longer_exist">This book is no longer exist in LStore</string>
+    <string name="success_delete_book">Book has been successfully deleted</string>
+    <string name="success_add_book">Book has been successfully added to the list</string>
 </resources>

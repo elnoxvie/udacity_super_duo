@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -61,9 +62,38 @@ public class BookService extends IntentService {
      * parameters.
      */
     private void deleteBook(String ean) {
-        if(ean!=null) {
-            getContentResolver().delete(AlexandriaContract.BookEntry.buildBookUri(Long.parseLong(ean)), null, null);
+        if(!TextUtils.isEmpty(ean)) {
+            if (ean.length() != 13){
+                sendMessageToApp(getResources().getString(R.string.err_isbn_length_incorrect));
+            }else{
+                Cursor bookEntry = getContentResolver().query(
+                        AlexandriaContract.BookEntry.buildBookUri(Long.parseLong(ean)),
+                        null, // leaving "columns" null just returns all the columns.
+                        null, // cols for "where" clause
+                        null, // values for "where" clause
+                        null  // sort order
+                );
+
+                if (bookEntry.getCount() == 0){
+                    bookEntry.close();
+
+                    sendMessageToApp(getResources().getString(R.string.err_no_longer_exist));
+                }else{
+                    getContentResolver().delete(AlexandriaContract.BookEntry.buildBookUri(Long.parseLong(ean)), null, null);
+
+                    sendMessageToApp(getResources().getString(R.string.success_delete_book));
+                }
+
+            }
+        }else{
+            sendMessageToApp(getResources().getString(R.string.isbn_empty));
         }
+    }
+
+    private void sendMessageToApp(String string) {
+        Intent messageIntent = new Intent(MainActivity.MESSAGE_EVENT);
+        messageIntent.putExtra(MainActivity.MESSAGE_KEY, string);
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(messageIntent);
     }
 
     /**
@@ -85,6 +115,7 @@ public class BookService extends IntentService {
         );
 
         if(bookEntry.getCount()>0){
+            getContentResolver().notifyChange(AlexandriaContract.BookEntry.buildBookUri(Long.parseLong(ean)), null);
             bookEntry.close();
             return;
         }
@@ -156,15 +187,21 @@ public class BookService extends IntentService {
         final String IMG_URL_PATH = "imageLinks";
         final String IMG_URL = "thumbnail";
 
+
         try {
+
+            if (TextUtils.isEmpty(bookJsonString)){
+                sendMessageToApp(getResources().getString(R.string.connection_error));
+                return;
+            }
+
+
             JSONObject bookJson = new JSONObject(bookJsonString);
             JSONArray bookArray;
             if(bookJson.has(ITEMS)){
                 bookArray = bookJson.getJSONArray(ITEMS);
             }else{
-                Intent messageIntent = new Intent(MainActivity.MESSAGE_EVENT);
-                messageIntent.putExtra(MainActivity.MESSAGE_KEY,getResources().getString(R.string.not_found));
-                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(messageIntent);
+                sendMessageToApp(getResources().getString(R.string.not_found));
                 return;
             }
 
@@ -195,6 +232,8 @@ public class BookService extends IntentService {
             if(bookInfo.has(CATEGORIES)){
                 writeBackCategories(ean,bookInfo.getJSONArray(CATEGORIES) );
             }
+
+            sendMessageToApp(getResources().getString(R.string.success_add_book));
 
         } catch (JSONException e) {
             Log.e(LOG_TAG, "Error ", e);
